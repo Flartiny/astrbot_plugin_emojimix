@@ -1,4 +1,4 @@
-# doNotPoke
+# emojiMix
 
 AstrBot 插件模板
 

@@ -146,17 +146,17 @@ class EmojiKitchenPlugin(Star):
 
     # --- 命令处理 (优先级较高) ---
     @filter.command("mixemoji", alias={"合成emoji", "emojimix"}, priority=1) # 设置较高优先级
-    async def mix_emoji_command(self, event: AstrMessageEvent):
-        """(命令) 合成两个 Emoji，生成类似 Google Emoji Kitchen 的图片链接。"""
-        input_text = event.get_message_str().strip()
-        parts = [p for p in input_text.split() if p]
+    # 修改函数签名，直接接收 emoji1 和 emoji2 参数
+    async def mix_emoji_command(self, event: AstrMessageEvent, emoji1: str, emoji2: str):
+        """(命令) 合成两个 Emoji，生成类似 Google Emoji Kitchen 的图片链接。用法: /mixemoji <emoji1> <emoji2>"""
 
-        if len(parts) < 2:
-            yield event.plain_result("🤔 请提供两个 Emoji 来合成。\n用法: `/mixemoji <emoji1> <emoji2>`")
+        if not emoji1 or not emoji2:
+            logger.warning(f"命令 /mixemoji 接收到空参数: emoji1='{emoji1}', emoji2='{emoji2}'")
+            yield event.plain_result("🤔 请确保提供了两个有效的 Emoji。\n用法: `/mixemoji <emoji1> <emoji2>`")
             return
 
-        emoji1 = parts[0]
-        emoji2 = parts[1]
+        # 现在 emoji1 和 emoji2 是由 AstrBot 框架直接传入的参数
+        logger.info(f"命令处理: /mixemoji，参数: emoji1='{emoji1}', emoji2='{emoji2}'")
 
         # 调用内部处理方法
         async for result in self._process_and_send_mix(event, emoji1, emoji2):
@@ -164,22 +164,9 @@ class EmojiKitchenPlugin(Star):
         # 命令处理完成后，阻止事件继续传播给低优先级的监听器
         event.stop_event()
 
-
     # --- 新增：自动检测双 Emoji 消息 (优先级较低) ---
     @filter.event_message_type(filter.EventMessageType.ALL, priority=-1) # 设置较低优先级
     async def handle_double_emoji_message(self, event: AstrMessageEvent):
-        """(自动检测) 如果消息仅包含两个 Emoji，则尝试合成。"""
-        # 1. 检查是否是命令，如果是则忽略 (命令处理器优先级更高，理论上不会到这里，但保险起见)
-        #    更可靠的方式是在命令处理器中使用 event.stop_event()
-        #    或者检查 event 是否已经被处理 (如果 AstrBot 支持)
-        #    这里假设命令处理器会停止事件，所以不再检查命令前缀
-
-        # 2. 检查发送者是否是机器人自身，避免自我触发 (需要确认如何可靠判断)
-        #    简单比较 self_id 和 sender_id 可能不适用于所有平台或情况
-        #    if event.get_sender_id() == event.self_id: # 假设可以这样判断
-        #        logger.debug("消息来自机器人自身，忽略自动检测。")
-        #        return
-
         # 3. 提取消息内容
         message_text = event.get_message_str().strip()
         if not message_text: # 忽略空消息
@@ -206,13 +193,4 @@ class EmojiKitchenPlugin(Star):
                 # 处理完成后，停止事件传播，避免干扰 LLM 或其他插件
                 event.stop_event()
             else:
-                 logger.debug(f"提取到两个 Emoji，但原消息包含其他字符: '{message_text}' -> '{text_without_emojis}'")
-        # else:
-            # logger.debug(f"消息 '{message_text}' 不符合双 Emoji 自动检测条件 (提取到 {len(emojis)} 个)。")
-
-
-# --- 集成说明 (保持不变) ---
-# 1. 目录结构: `astrbot/data/plugins/emoji_kitchen_plugin/`
-# 2. 文件: `main.py` (本文件), `_conf_schema.json`, `requirements.txt` (内容: aiohttp>=3.8.0)
-# 3. 重启 AstrBot。
-# 4. 测试: `/mixemoji 😂 👍`, 或直接发送 `😂👍`, 或 `😂 👍`。
+                logger.debug(f"提取到两个 Emoji，但原消息包含其他字符: '{message_text}' -> '{text_without_emojis}'")
