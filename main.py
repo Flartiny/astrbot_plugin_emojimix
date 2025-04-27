@@ -2,8 +2,6 @@ import asyncio
 import aiohttp
 from typing import Optional, List, Dict, Any
 import re
-
-# 从 AstrBot API 导入必要的模块
 from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult
 from astrbot.api.star import Context, Star, register
 from astrbot.api import logger, AstrBotConfig
@@ -30,7 +28,6 @@ EMOJI_PATTERN = re.compile(
     re.UNICODE
 )
 
-# --- 插件注册信息 ---
 @register("emojiMix", "Flartiny ", "合成emoji插件", "1.0.0")
 class EmojiKitchenPlugin(Star):
     # --- 配置项 (保持不变) ---
@@ -57,7 +54,7 @@ class EmojiKitchenPlugin(Star):
         logger.info("EmojiKitchenPlugin 正在终止。")
         pass
 
-    # --- 核心 Emoji 处理逻辑 (内部辅助方法，保持不变) ---
+    # ---核心 Emoji 处理逻辑---
     def _get_emoji_hex_code(self, emoji: str) -> Optional[str]:
         try:
             cleaned_emoji = emoji.replace('\ufe0f', '') # 移除 VS16
@@ -144,7 +141,7 @@ class EmojiKitchenPlugin(Star):
             logger.info(f"未能找到 {emoji1} + {emoji2} 的混合 Emoji。")
             yield event.plain_result(response_text)
 
-    # --- 命令处理 (优先级较高) ---
+    # --- 命令处理 ---
     @filter.command("mixemoji", alias={"合成emoji", "emojimix"}, priority=1)
     async def mix_emoji_command(self, event: AstrMessageEvent):
         """(命令) 合成两个 Emoji。用法: /mixemoji <emoji1><emoji2> 或 /mixemoji <emoji1> <emoji2>"""
@@ -162,11 +159,11 @@ class EmojiKitchenPlugin(Star):
             event.stop_event()
             return
 
-        # 2. 尝试提取文本中的所有 Emoji (使用修正后的 regex)
+        # 尝试提取文本中的所有 Emoji
         emojis = self._extract_emojis_from_text(input_text)
         logger.debug(f"命令 /mixemoji 从 '{input_text}' 提取到 emojis: {emojis}")
 
-        # 3. 验证逻辑 (保持不变)
+        # 3. 验证逻辑
         if len(emojis) == 2:
             text_without_emojis = input_text
             temp_text = text_without_emojis.replace(emojis[0], '', 1)
@@ -195,18 +192,18 @@ class EmojiKitchenPlugin(Star):
         # 命令处理完成后阻止事件继续传播
         event.stop_event()
 
-    # --- 新增：自动检测双 Emoji 消息 (优先级较低) ---
+    # --- 新增：自动检测双 Emoji 消息 ---
     @filter.event_message_type(filter.EventMessageType.ALL, priority=-1) # 设置较低优先级
     async def handle_double_emoji_message(self, event: AstrMessageEvent):
-        # 3. 提取消息内容
+        # 提取消息内容
         message_text = event.get_message_str().strip()
         if not message_text: # 忽略空消息
             return
 
-        # 4. 尝试提取 Emoji
+        # 尝试提取 Emoji
         emojis = self._extract_emojis_from_text(message_text)
 
-        # 5. 判断是否恰好是两个 Emoji，且原消息基本就是这两个 Emoji 组成
+        # 判断是否恰好是两个 Emoji，且原消息基本就是这两个 Emoji 组成
         if len(emojis) == 2:
             # 进一步检查，去除所有非 Emoji 字符后是否为空，或者只剩空格
             text_without_emojis = message_text
