@@ -145,54 +145,47 @@ class EmojiKitchenPlugin(Star):
             yield event.plain_result(response_text)
 
     # --- 命令处理 (优先级较高) ---
-    @filter.command("mixemoji", alias={"合成emoji", "emojimix"}, priority=1) # 设置较高优先级
-    async def mix_emoji_command(self, event: AstrMessageEvent):
-        # 1. 获取命令后的所有文本
-        input_text = event.message_str.strip() # 使用 event.message_str 获取命令后的内容
+    @filter.command("mixemoji", alias={"合成emoji", "emojimix"}, priority=1)
+    async def mix_emoji_command(self, event: AstrMessageEvent, all_args: str):
+        """(命令) 合成两个 Emoji。用法: /mixemoji <emoji1><emoji2> 或 /mixemoji <emoji1> <emoji2>"""
+
+        # 1. 现在 all_args 应该包含了命令后的所有文本
+        input_text = all_args.strip()
         if not input_text:
-            yield event.plain_result("🤔 请在命令后提供两个 Emoji 来合成。\n例如: `/mixemoji 😂👍`")
+            yield event.plain_result("🤔 请在命令后提供两个 Emoji 来合成。\n例如: `/mixemoji 😂👍` 或 `/mixemoji 😂 👍`")
             return
 
         # 2. 尝试提取文本中的所有 Emoji
+        #    (复用之前的 _extract_emojis_from_text 和验证逻辑)
         emojis = self._extract_emojis_from_text(input_text)
 
         # 3. 验证是否恰好提取到两个 Emoji，并且原始输入主要就是这两个 Emoji
         if len(emojis) == 2:
-            # 进一步检查：移除这两个 Emoji 后，剩余部分是否为空或仅包含空格
             text_without_emojis = input_text
-            # 确保按原样替换，避免内部字符干扰，只替换一次
-            # 按找到的顺序替换可能更安全
             temp_text = text_without_emojis.replace(emojis[0], '', 1)
             temp_text = temp_text.replace(emojis[1], '', 1)
 
-            # 如果移除 emoji 后，剩余部分去除空格后为空，则认为是有效输入
             if not temp_text.strip():
                 emoji1 = emojis[0]
                 emoji2 = emojis[1]
-
                 logger.info(f"命令 /mixemoji 解析成功: emoji1='{emoji1}', emoji2='{emoji2}'")
-
-                # 调用内部处理方法
                 async for result in self._process_and_send_mix(event, emoji1, emoji2):
                     yield result
-
             else:
-                # 提取到两个 Emoji，但原始输入包含其他非空格字符
                 logger.warning(f"命令 /mixemoji 输入 '{input_text}' 包含除两个 Emoji 和空格外的其他字符: '{temp_text.strip()}'")
                 yield event.plain_result(f"🤔 请确保命令后只提供两个 Emoji (可以有空格分隔)。检测到额外字符: '{temp_text.strip()}'")
 
         elif len(emojis) == 1:
-             # 只提取到一个 Emoji
             logger.warning(f"命令 /mixemoji 输入 '{input_text}' 只包含一个 Emoji。")
             yield event.plain_result("🤔 检测到只有一个 Emoji，请提供两个 Emoji 来合成。")
         elif len(emojis) > 2:
-             # 提取到超过两个 Emoji
             logger.warning(f"命令 /mixemoji 输入 '{input_text}' 包含超过两个 Emoji。")
             yield event.plain_result("🤔 检测到超过两个 Emoji，请只提供两个 Emoji 来合成。")
         else:
-            # 没有提取到 Emoji
             logger.warning(f"命令 /mixemoji 输入 '{input_text}' 未检测到有效的 Emoji。")
             yield event.plain_result("🤔 未能在输入中检测到有效的 Emoji，请提供两个 Emoji。")
+
+        # 命令处理完成后阻止事件继续传播
         event.stop_event()
 
     # --- 新增：自动检测双 Emoji 消息 (优先级较低) ---
