@@ -146,20 +146,27 @@ class EmojiKitchenPlugin(Star):
 
     # --- 命令处理 (优先级较高) ---
     @filter.command("mixemoji", alias={"合成emoji", "emojimix"}, priority=1)
-    async def mix_emoji_command(self, event: AstrMessageEvent, all_args: str):
+    async def mix_emoji_command(self, event: AstrMessageEvent):
         """(命令) 合成两个 Emoji。用法: /mixemoji <emoji1><emoji2> 或 /mixemoji <emoji1> <emoji2>"""
+        input_text = event.message_str.strip()
 
-        # 1. 现在 all_args 应该包含了命令后的所有文本
-        input_text = all_args.strip()
+        if 'mixemoji' in input_text:
+            input_text = input_text.replace('mixemoji', '', 1).strip()
+
+        # 添加日志，确认 input_text 的内容
+        logger.debug(f"命令 /mixemoji 接收到的原始参数文本 (event.message_str): '{input_text}'")
+
         if not input_text:
-            yield event.plain_result("🤔 请在命令后提供两个 Emoji 来合成。\n例如: `/mixemoji 😂👍` 或 `/mixemoji 😂 👍`")
+            yield event.plain_result("🤔 请在命令后提供两个 Emoji 来合成。\n例如: `/mixemoji 😂👍`")
+            # 确保停止事件，即使没有参数也由命令处理器处理了
+            event.stop_event()
             return
 
-        # 2. 尝试提取文本中的所有 Emoji
-        #    (复用之前的 _extract_emojis_from_text 和验证逻辑)
+        # 2. 尝试提取文本中的所有 Emoji (使用修正后的 regex)
         emojis = self._extract_emojis_from_text(input_text)
+        logger.debug(f"命令 /mixemoji 从 '{input_text}' 提取到 emojis: {emojis}")
 
-        # 3. 验证是否恰好提取到两个 Emoji，并且原始输入主要就是这两个 Emoji
+        # 3. 验证逻辑 (保持不变)
         if len(emojis) == 2:
             text_without_emojis = input_text
             temp_text = text_without_emojis.replace(emojis[0], '', 1)
