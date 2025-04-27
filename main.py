@@ -45,7 +45,6 @@ class EmojiKitchenPlugin(Star):
         self.date_codes = self.config.get("date_codes", self.DEFAULT_DATE_CODES)
         self.base_url_template = self.config.get("base_url_template", self.DEFAULT_BASE_URL_TEMPLATE)
         self.request_timeout = self.config.get("request_timeout", self.DEFAULT_REQUEST_TIMEOUT)
-        logger.info(f"EmojiKitchenPlugin v{self.metadata.version} 已加载。")
         logger.debug(f"EmojiKitchen 使用的日期代码: {self.date_codes}")
         logger.debug(f"EmojiKitchen 使用的 URL 模板: {self.base_url_template}")
         logger.debug(f"EmojiKitchen 请求超时: {self.request_timeout}s")
