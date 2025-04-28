@@ -46,7 +46,7 @@
     "base_url_template": {
       "description": "Emoji Kitchen 图片的基础 URL 模板。除非 Google 更改结构，否则无需修改。",
       "type": "string",
-      "default": "https://www.gstatic.com/android/keyboard/emojikitchen/{date_code}/{hex1}/{hex1}_{hex2}.png",
+      "default": "https://www.gstatic.com/android/keyboard/emojikitchen/{date_code}/{hex1}/{hex1}_{hex2}.png"
     },
     "request_timeout": {
       "description": "检查每个 Emoji Kitchen 图片 URL 的超时时间（秒）。",
