@@ -16,6 +16,7 @@ class EmojiMixPlugin(Star):
         self.date_codes = self.config.get("date_codes")
         self.base_url_template = self.config.get("base_url_template")
         self.request_timeout = self.config.get("request_timeout")
+        logger.info(self.base_url_template)
 
     async def initialize(self):
         logger.info("EmojiKitchenPlugin 初始化完成。")
