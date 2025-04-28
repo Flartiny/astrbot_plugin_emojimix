@@ -44,7 +44,7 @@ class EmojiMixPlugin(Star):
             logger.warning(f"无法为 '{emoji1}' 或 '{emoji2}' 获取有效的十六进制代码。")
             return None
 
-        logger.info(f"正在尝试混合: {emoji1} (u{hex1}) + {emoji2} (u{hex2})")
+        logger.info(f"正在尝试混合: {emoji1} ({hex1}) + {emoji2} ({hex2})")
 
         async with aiohttp.ClientSession() as session:
             urls_to_check = []
@@ -61,6 +61,7 @@ class EmojiMixPlugin(Star):
 
             for url in urls_to_check:
                 try:
+                    logger.info(f"正在检查 URL: {url}")
                     async with session.head(url, timeout=self.request_timeout) as response:
                         if response.status == 200:
                             logger.info(f"找到有效的 Emoji Kitchen URL: {url}")
@@ -120,7 +121,7 @@ class EmojiMixPlugin(Star):
         emojis = self._extract_emojis_from_text(input_text)
         logger.debug(f"命令 /emojimix 从 '{input_text}' 提取到 emojis: {emojis}")
 
-        # 3. 验证逻辑
+        # 验证逻辑
         if len(emojis) == 2:
             text_without_emojis = input_text
             temp_text = text_without_emojis.replace(emojis[0], '', 1)
