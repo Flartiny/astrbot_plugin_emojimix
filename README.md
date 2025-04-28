@@ -1,8 +1,16 @@
 # astrbot_plugin_emojimix
 
-一个用于 AstrBot 的插件，实现类似Google Emoji Kitchen的效果。
-可由指令触发，也支持自动检测双emoji消息。
-配置中date_codes从[metadata.json](https://raw.githubusercontent.com/xsalazar/emoji-kitchen-backend/main/app/metadata.json)解析而来，解析代码如下可供参考
+# 简介
+一个用于 AstrBot 的插件，实现类似Google Emoji Kitchen的效果。可由指令触发，也支持自动检测双emoji消息。
+
+# 使用
+指令触发：
+
+    /emojimix <emoji1><emoji2>
+或自动检测触发，如下图（右）
+![alt](https://eimg.flartiny.cloudns.ch/i/2025/04/28/vxz4ro-0.png)
+# 配置
+配置中date_codes从[metadata.json](https://raw.githubusercontent.com/xsalazar/emoji-kitchen-backend/main/app/metadata.json)解析而来，不定时更新，如需主动解析，代码如下可供参考
 ```python
 # wget https://raw.githubusercontent.com/xsalazar/emoji-kitchen-backend/main/app/metadata.json -O metadata.json
 import re
