@@ -1,6 +1,6 @@
 {
     "date_codes": {
-      "description": "用于尝试查找 Emoji Kitchen 图片的日期代码列表。通常不需要修改。",
+      "description": "Emoji Kitchen 图片的日期代码列表。",
       "type": "list",
       "default": [
         "20240204",
@@ -40,17 +40,24 @@
         "20210218",
         "20201001"
       ],
-      "hint": "默认按降序排列，优先尝试较新的日期代码，但添加后乱序也不影响。"
+      "hint": "默认按降序排列，优先尝试较新的日期代码，但添加后乱序也不影响。通常不需要修改。"
     },
     "base_url_template": {
-      "description": "Emoji Kitchen 图片的基础 URL 模板。除非 Google 更改结构，否则无需修改。",
+      "description": "Emoji Kitchen 基础 URL 模板",
       "type": "string",
-      "default": "https://www.gstatic.com/android/keyboard/emojikitchen/{date_code}/{hex1}/{hex1}_{hex2}.png"
+      "default": "https://www.gstatic.com/android/keyboard/emojikitchen/{date_code}/{hex1}/{hex1}_{hex2}.png",
+      "hint": "除非 Google 更改结构，否则无需修改"
     },
     "request_timeout": {
       "description": "检查每个 Emoji Kitchen 图片 URL 的超时时间（秒）。",
       "type": "float",
       "default": 3.0,
       "hint": "增加此值可能找到更多组合，但会降低响应速度；减小则相反。"
+    },
+    "auto_trigger": {
+      "description": "是否自动触发合成",
+      "type": "bool",
+      "default": true,
+      "hint": "是否自动识别双 emoji 消息并触发合成"
     }
   }

@@ -16,6 +16,7 @@ class EmojiMixPlugin(Star):
         self.date_codes = self.config.get("date_codes")
         self.base_url_template = self.config.get("base_url_template")
         self.request_timeout = self.config.get("request_timeout")
+        self.auto_trigger = self.config.get("auto_trigger", True)
 
     async def initialize(self):
         logger.info("EmojiKitchenPlugin 初始化完成。")
@@ -181,32 +182,33 @@ class EmojiMixPlugin(Star):
         event.stop_event()
 
     # --- 自动检测双 Emoji 消息 ---
-    @filter.event_message_type(filter.EventMessageType.ALL, priority=-1)
+    @filter.event_message_type(filter.EventMessageType.ALL)
     async def handle_double_emoji_message(self, event: AstrMessageEvent):
-        message_text = event.get_message_str().strip()
-        if not message_text:  # 忽略空消息
-            return
+        if self.auto_trigger:
+            message_text = event.get_message_str().strip()
+            if not message_text:  # 忽略空消息
+                return
 
-        emojis = self._extract_emojis_from_text(message_text)
+            emojis = self._extract_emojis_from_text(message_text)
 
-        if len(emojis) == 2:
-            # 进一步检查，去除所有非 Emoji 字符后是否为空，或者只剩空格
-            text_without_emojis = message_text
-            for e in emojis:
-                text_without_emojis = text_without_emojis.replace(
-                    e, "", 1
-                )  # 替换一次，防止emoji内部字符被误删
+            if len(emojis) == 2:
+                # 进一步检查，去除所有非 Emoji 字符后是否为空，或者只剩空格
+                text_without_emojis = message_text
+                for e in emojis:
+                    text_without_emojis = text_without_emojis.replace(
+                        e, "", 1
+                    )  # 替换一次，防止emoji内部字符被误删
 
-            if not text_without_emojis.strip():  # 如果移除 emojis 后只剩空格或为空
-                emoji1 = emojis[0]
-                emoji2 = emojis[1]
+                if not text_without_emojis.strip():  # 如果移除 emojis 后只剩空格或为空
+                    emoji1 = emojis[0]
+                    emoji2 = emojis[1]
 
-                logger.debug(f"自动检测到双 Emoji 消息: '{emoji1}' 和 '{emoji2}'")
-                # 调用内部处理方法
-                async for result in self._process_and_send_mix(event, emoji1, emoji2):
-                    yield result
-                event.stop_event()
-            else:
-                logger.debug(
-                    f"提取到两个 Emoji，但原消息包含其他字符: '{message_text}' -> '{text_without_emojis}'"
-                )
+                    logger.debug(f"自动检测到双 Emoji 消息: '{emoji1}' 和 '{emoji2}'")
+                    # 调用内部处理方法
+                    async for result in self._process_and_send_mix(event, emoji1, emoji2):
+                        yield result
+                    event.stop_event()
+                else:
+                    logger.debug(
+                        f"提取到两个 Emoji，但原消息包含其他字符: '{message_text}' -> '{text_without_emojis}'"
+                    )
