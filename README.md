@@ -8,7 +8,7 @@
 
     /emojimix <emoji1><emoji2>
 或自动检测触发，如下图（右）
-![alt](https://eimg.flartiny.cloudns.ch/i/2025/04/28/vxz4ro-0.png)
+![alt](https://tc.flartiny.top/images/2026/02/15/20260215121158132.png)
 # 配置
 配置中date_codes从[metadata.json](https://raw.githubusercontent.com/xsalazar/emoji-kitchen-backend/main/app/metadata.json)解析而来，不定时更新，如需主动解析，代码如下可供参考
 ```python
